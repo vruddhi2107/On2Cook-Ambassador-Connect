@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambassador Connect — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="app-page">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-logo small"><span class="logo-icon">⬡</span></div>
+      <span class="sidebar-brand">Ambassador<em>Connect</em></span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-view="dashboard" onclick="switchView('dashboard', this)">
+        <span class="nav-icon">◈</span> Dashboard
+      </a>
+      <a href="#" class="nav-item" data-view="ambassadors" onclick="switchView('ambassadors', this)">
+        <span class="nav-icon">◎</span> Ambassadors
+      </a>
+      <a href="#" class="nav-item" data-view="my-ambassadors" onclick="switchView('my-ambassadors', this)">
+        <span class="nav-icon">◉</span> My Assignments
+      </a>
+      <a href="#" class="nav-item admin-only" data-view="sales" onclick="switchView('sales', this)" style="display:none">
+        <span class="nav-icon">◫</span> Sales Members
+      </a>
+      <a href="#" class="nav-item admin-only" data-view="admin" onclick="switchView('admin', this)" style="display:none">
+        <span class="nav-icon">⬙</span> Admin Panel
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip" id="userChip">
+        <div class="user-avatar" id="userAvatarSidebar">?</div>
+        <div class="user-info">
+          <span class="user-name" id="userNameSidebar">Loading...</span>
+          <span class="user-role" id="userRoleSidebar">—</span>
+        </div>
+      </div>
+      <button class="btn-icon logout-btn" onclick="handleLogout()" title="Sign out">⏻</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-icon sidebar-toggle" onclick="toggleSidebar()">☰</button>
+        <h2 class="page-title" id="pageTitle">Dashboard</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="search-bar">
+          <span class="search-icon">⌕</span>
+          <input type="text" id="globalSearch" placeholder="Search ambassadors..." oninput="handleSearch(this.value)" />
+        </div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD VIEW -->
+    <div id="view-dashboard" class="view active">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-label">Total Ambassadors</div>
+          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-sub">Across all states</div>
+        </div>
+        <div class="stat-card accent">
+          <div class="stat-label">My Assignments</div>
+          <div class="stat-value" id="statMine">—</div>
+          <div class="stat-sub">Active connections</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Followers</div>
+          <div class="stat-value" id="statFollowers">—</div>
+          <div class="stat-sub">Combined reach</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Notes This Week</div>
+          <div class="stat-value" id="statNotes">—</div>
+          <div class="stat-sub">Conversations logged</div>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><h3>Recent Activity</h3></div>
+          <div class="activity-feed" id="activityFeed"><div class="loading-pulse">Loading activity...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Top Ambassadors by Reach</h3></div>
+          <div class="top-list" id="topAmbassadors"><div class="loading-pulse">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AMBASSADORS VIEW -->
+    <div id="view-ambassadors" class="view">
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="filter-bar-left">
+          <!-- Search -->
+          <div class="filter-search">
+            <span class="search-icon">⌕</span>
+            <input type="text" id="ambSearch" placeholder="Search name, city, state..." oninput="applyFilters()" />
+          </div>
+
+          <!-- City filter -->
+          <div class="filter-dropdown-wrap">
+            <select id="filterCity" class="filter-select" onchange="applyFilters()">
+              <option value="">All Cities</option>
+            </select>
+          </div>
+
+          <!-- State filter -->
+          <div class="filter-dropdown-wrap">
+            <select id="filterState" class="filter-select" onchange="applyFilters()">
+              <option value="">All States</option>
+            </select>
+          </div>
+
+          <!-- Assigned To filter -->
+          <div class="filter-dropdown-wrap">
+            <select id="filterAssigned" class="filter-select" onchange="applyFilters()">
+              <option value="">All Members</option>
+              <option value="unassigned">Unassigned</option>
+            </select>
+          </div>
+
+          <!-- Status filter -->
+          <div class="filter-dropdown-wrap">
+            <select id="filterStatus" class="filter-select" onchange="applyFilters()">
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+
+          <!-- Clear filters -->
+          <button class="btn-clear-filters" id="clearFiltersBtn" onclick="clearFilters()" style="display:none">✕ Clear</button>
+        </div>
+
+        <div class="filter-bar-right">          <!-- Results count -->
+          <span class="results-count" id="resultsCount"></span>
+
+          <!-- View toggle -->
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" id="vbtn-grid" onclick="setAmbView('grid', this)" title="Grid view">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"/></svg>
+            </button>
+            <button class="view-toggle-btn" id="vbtn-list" onclick="setAmbView('list', this)" title="List view">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="2.5" rx="1.25" fill="currentColor"/><rect x="1" y="6.75" width="14" height="2.5" rx="1.25" fill="currentColor"/><rect x="1" y="11.5" width="14" height="2.5" rx="1.25" fill="currentColor"/></svg>
+            </button>
+            <button class="view-toggle-btn" id="vbtn-kanban" onclick="setAmbView('kanban', this)" title="Kanban view">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="4" height="14" rx="1.5" fill="currentColor"/><rect x="6" y="1" width="4" height="10" rx="1.5" fill="currentColor"/><rect x="11" y="1" width="4" height="12" rx="1.5" fill="currentColor"/></svg>
+            </button>
+            <button class="view-toggle-btn" id="vbtn-compact" onclick="setAmbView('compact', this)" title="Compact view">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="14" height="3.5" rx="1.5" fill="currentColor"/><rect x="1" y="6.25" width="14" height="3.5" rx="1.5" fill="currentColor"/><rect x="1" y="11.5" width="14" height="3.5" rx="1.5" fill="currentColor"/></svg>
+            </button>
+          </div>
+
+          <button class="btn btn-primary btn-sm" id="addAmbassadorBtn" onclick="openAmbassadorModal()" style="display:none">
+            + Add Ambassador
+          </button>
+        </div>
+      </div>
+
+      <!-- TAG FILTER ROW -->
+      <div class="tag-filter-row" id="tagFilterChips"></div>
+
+      <!-- RANGE FILTERS ROW -->
+      <div class="range-filter-bar">
+        <div class="range-filter-group">
+          <span class="range-filter-label">👥 Followers</span>
+          <input type="number" id="filter_followersMin" class="range-input" placeholder="Min" min="0" oninput="applyFilters()" />
+          <span class="range-sep">–</span>
+          <input type="number" id="filter_followersMax" class="range-input" placeholder="Max" min="0" oninput="applyFilters()" />
+        </div>
+        <div class="range-filter-divider"></div>
+        <div class="range-filter-group">
+          <span class="range-filter-label">⭐ Yrs Exp.</span>
+          <input type="number" id="filter_yoeMin" class="range-input" placeholder="Min" min="0" max="60" oninput="applyFilters()" />
+          <span class="range-sep">–</span>
+          <input type="number" id="filter_yoeMax" class="range-input" placeholder="Max" min="0" max="60" oninput="applyFilters()" />
+        </div>
+      </div>
+
+      <!-- GRID VIEW -->
+      <div id="amb-view-grid" class="amb-view active">
+        <div class="ambassadors-grid" id="ambassadorsGrid">
+          <div class="loading-pulse">Loading ambassadors...</div>
+        </div>
+      </div>
+
+      <!-- LIST VIEW -->
+      <div id="amb-view-list" class="amb-view">
+        <div class="list-view-wrap">
+          <table class="list-table" id="ambassadorsList">
+            <thead>
+              <tr>
+                <th>Ambassador</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Followers</th>
+                <th>Exp.</th>
+                <th>Assigned To</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ambassadorsListBody">
+              <tr><td colspan="8" class="loading-pulse">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- KANBAN VIEW -->
+      <div id="amb-view-kanban" class="amb-view">
+        <div class="kanban-board" id="kanbanBoard">
+          <div class="loading-pulse">Loading kanban...</div>
+        </div>
+      </div>
+
+      <!-- COMPACT VIEW -->
+      <div id="amb-view-compact" class="amb-view">
+        <div class="compact-list" id="ambassadorsCompact">
+          <div class="loading-pulse">Loading...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MY ASSIGNMENTS VIEW -->
+    <div id="view-my-ambassadors" class="view">
+      <div class="filter-bar">
+        <div class="filter-bar-left">
+          <div class="filter-search">
+            <span class="search-icon">⌕</span>
+            <input type="text" id="myAmbSearch" placeholder="Search your ambassadors..." oninput="renderMyAmbassadors()" />
+          </div>
+        </div>
+        <div class="filter-bar-right">
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" id="mvbtn-grid" onclick="setMyView('grid', this)">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"/></svg>
+            </button>
+            <button class="view-toggle-btn" id="mvbtn-list" onclick="setMyView('list', this)">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="2.5" rx="1.25" fill="currentColor"/><rect x="1" y="6.75" width="14" height="2.5" rx="1.25" fill="currentColor"/><rect x="1" y="11.5" width="14" height="2.5" rx="1.25" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div id="my-view-grid" class="amb-view active">
+        <div class="ambassadors-grid" id="myAmbassadorsGrid"><div class="loading-pulse">Loading your assignments...</div></div>
+      </div>
+      <div id="my-view-list" class="amb-view">
+        <div class="list-view-wrap">
+          <table class="list-table">
+            <thead><tr><th>Ambassador</th><th>City</th><th>State</th><th>Followers</th><th>Exp.</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="myAmbassadorsListBody"><tr><td colspan="7" class="loading-pulse">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SALES MEMBERS VIEW -->
+    <div id="view-sales" class="view">
+      <div class="view-toolbar">
+        <p class="view-subtitle">All sales team members</p>
+        <button class="btn btn-primary" onclick="openAddSalesModal()">+ Add Sales Member</button>
+      </div>
+      <div class="sales-grid" id="salesGrid"><div class="loading-pulse">Loading sales members...</div></div>
+    </div>
+
+    <!-- ADMIN VIEW -->
+    <div id="view-admin" class="view">
+      <div class="admin-sections">
+        <div class="card">
+          <div class="card-header"><h3>⬙ Admin Controls</h3></div>
+          <div class="admin-actions">
+            <button class="btn btn-outline" onclick="openAddSalesModal()">➕ Add Sales Member</button>
+            <button class="btn btn-outline" onclick="openAmbassadorModal()">➕ Add Ambassador</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>All Users</h3></div>
+          <div id="allUsersTable" class="table-wrap"><div class="loading-pulse">Loading users...</div></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============ MODALS ============ -->
+
+  <!-- Ambassador Modal -->
+  <div class="modal-overlay" id="ambassadorModal" onclick="closeModalOnOverlay(event, 'ambassadorModal')">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="ambassadorModalTitle">Add Ambassador</h3>
+        <button class="btn-icon" onclick="closeModal('ambassadorModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="ambassadorId" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="ambName" class="form-input" placeholder="Jane Doe" />
+          </div>
+          <div class="form-group">
+            <label>City *</label>
+            <input type="text" id="ambCity" class="form-input" placeholder="New York" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>State *</label>
+            <input type="text" id="ambState" class="form-input" placeholder="NY" />
+          </div>
+          <div class="form-group">
+            <label>Followers</label>
+            <input type="number" id="ambFollowers" class="form-input" placeholder="10000" min="0" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Years of Experience</label>
+            <input type="number" id="ambYoe" class="form-input" placeholder="e.g. 8" min="0" max="60" />
+          </div>
+          <div class="form-group"><!-- spacer --></div>
+        </div>
+        <div class="form-group">
+          <label>LinkedIn URL</label>
+          <input type="url" id="ambLinkedin" class="form-input" placeholder="https://linkedin.com/in/..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="ambEmail" class="form-input" placeholder="jane@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="ambPhone" class="form-input" placeholder="+1 555 000 0000" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea id="ambBio" class="form-input" rows="2" placeholder="Short bio or description..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tags / Category</label>
+          <div class="tag-checkboxes" id="ambTagsContainer">
+            <!-- rendered by JS -->
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Assign To (Sales Member)</label>
+            <select id="ambAssignTo" class="form-input">
+              <option value="">— Unassigned —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="ambStatus" class="form-input">
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('ambassadorModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAmbassador()">Save Ambassador</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Assign Modal -->
+  <div class="modal-overlay" id="quickAssignModal" onclick="closeModalOnOverlay(event, 'quickAssignModal')">
+    <div class="modal" style="max-width:380px">
+      <div class="modal-header">
+        <h3>Assign Ambassador</h3>
+        <button class="btn-icon" onclick="closeModal('quickAssignModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.875rem;color:var(--gray-600);margin-bottom:1rem">
+          Assigning: <strong id="quickAssignName"></strong>
+        </p>
+        <div class="form-group">
+          <label>Assign to Sales Member</label>
+          <select id="quickAssignSelect" class="form-input">
+            <option value="">— Unassigned —</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('quickAssignModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveQuickAssign()">Assign</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ambassador Detail / Notes Modal -->
+  <div class="modal-overlay" id="detailModal" onclick="closeModalOnOverlay(event, 'detailModal')">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <div class="detail-title-block">
+          <div class="ambassador-avatar-lg" id="detailAvatar">JD</div>
+          <div>
+            <h3 id="detailName">Ambassador Name</h3>
+            <p id="detailMeta">City, State · 0 followers</p>
+          </div>
+        </div>
+        <button class="btn-icon" onclick="closeModal('detailModal')">✕</button>
+      </div>
+      <div class="modal-body detail-layout">
+        <div class="detail-info-col">
+          <div class="detail-section">
+            <h4>Tags</h4>
+            <div id="detailTags" style="display:flex;flex-wrap:wrap;gap:5px"></div>
+          </div>
+          <div class="detail-section">
+            <h4>Contact Info</h4>
+            <div id="detailContactInfo"></div>
+          </div>
+          <div class="detail-section">
+            <h4>Assignment</h4>
+            <div id="detailAssignment"></div>
+          </div>
+          <div class="detail-section">
+            <h4>Bio</h4>
+            <p id="detailBio" class="bio-text">—</p>
+          </div>
+          <div class="detail-actions-row">
+            <button class="btn btn-outline btn-sm" id="detailEditBtn" onclick="editCurrentAmbassador()">✎ Edit</button>
+            <button class="btn btn-danger-ghost btn-sm admin-only" id="detailDeleteBtn" onclick="deleteCurrentAmbassador()" style="display:none">✕ Delete</button>
+          </div>
+        </div>
+        <div class="detail-notes-col">
+          <div class="notes-header">
+            <h4>Conversation Notes</h4>
+            <div class="note-type-tabs" id="noteTypeTabs">
+              <button class="note-tab active" data-type="all" onclick="filterNotes('all', this)">All</button>
+              <button class="note-tab" data-type="call" onclick="filterNotes('call', this)">📞 Call</button>
+              <button class="note-tab" data-type="email" onclick="filterNotes('email', this)">✉ Email</button>
+              <button class="note-tab" data-type="meeting" onclick="filterNotes('meeting', this)">👥 Meeting</button>
+              <button class="note-tab" data-type="follow_up" onclick="filterNotes('follow_up', this)">⏰ Follow-up</button>
+            </div>
+          </div>
+          <div class="note-compose">
+            <select id="newNoteType" class="form-input form-input-sm">
+              <option value="general">General</option>
+              <option value="call">📞 Call</option>
+              <option value="email">✉ Email</option>
+              <option value="meeting">👥 Meeting</option>
+              <option value="follow_up">⏰ Follow-up</option>
+            </select>
+            <textarea id="newNoteContent" class="form-input" rows="3" placeholder="Log a conversation, call summary, next steps..."></textarea>
+            <button class="btn btn-primary btn-sm" onclick="addNote()">Add Note</button>
+          </div>
+          <div class="notes-list" id="notesList">
+            <div class="loading-pulse">Loading notes...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Sales Member Modal -->
+  <div class="modal-overlay" id="salesModal" onclick="closeModalOnOverlay(event, 'salesModal')">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add Sales Member</h3>
+        <button class="btn-icon" onclick="closeModal('salesModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="salesModalError" class="alert alert-error" style="display:none"></div>
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="salesName" class="form-input" placeholder="John Smith" />
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input type="email" id="salesEmail" class="form-input" placeholder="john@company.com" />
+        </div>
+        <div class="form-group">
+          <label>Temporary Password *</label>
+          <input type="password" id="salesPassword" class="form-input" placeholder="Min. 8 characters" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal('salesModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="addSalesMember()">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
