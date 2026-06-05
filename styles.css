@@ -87,9 +87,9 @@ body {
 }
 
 .brand-logo .logo-icon {
-  font-size: 1.6rem;
-  color: var(--coral);
-  line-height: 1;
+  width: 44px;   /* adjust size */
+  height: auto;
+  display: inline-block;
 }
 
 .brand-name {
