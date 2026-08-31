@@ -280,6 +280,7 @@ function renderGridView(list) {
         </div>
         <div style="display:flex;gap:0.4rem;align-items:center">
           ${amb.linkedin_url?`<a href="${amb.linkedin_url}" target="_blank" onclick="event.stopPropagation()" class="linkedin-link">in</a>`:''}
+          ${amb.instagram_url?`<a href="${amb.instagram_url}" target="_blank" onclick="event.stopPropagation()" class="instagram-link">IG</a>`:''}
           <button class="assign-quick-btn" onclick="event.stopPropagation();openQuickAssign('${amb.id}')" title="Reassign">⇄</button>
         </div>
       </div>
@@ -323,6 +324,7 @@ function renderListView(list) {
       <td>
         <div style="display:flex;gap:0.375rem">
           ${amb.linkedin_url?`<a href="${amb.linkedin_url}" target="_blank" onclick="event.stopPropagation()" class="linkedin-link">in</a>`:''}
+          ${amb.instagram_url?`<a href="${amb.instagram_url}" target="_blank" onclick="event.stopPropagation()" class="instagram-link">IG</a>`:''}
           <button class="btn btn-sm btn-outline" onclick="event.stopPropagation();editAmbassador('${amb.id}')">✎</button>
         </div>
       </td>
@@ -485,6 +487,7 @@ function renderCompactView(list) {
       </div>
       <span class="status-badge status-${amb.status||'active'}">${amb.status||'active'}</span>
       ${amb.linkedin_url?`<a href="${amb.linkedin_url}" target="_blank" onclick="event.stopPropagation()" class="linkedin-link">in</a>`:'<span></span>'}
+      ${amb.instagram_url?`<a href="${amb.instagram_url}" target="_blank" onclick="event.stopPropagation()" class="instagram-link">IG</a>`:'<span></span>'}
     </div>`;
   }).join('');
 }
@@ -521,6 +524,7 @@ function renderMyAmbassadors() {
         </div>
         <div class="amb-card-footer">
           ${amb.linkedin_url?`<a href="${amb.linkedin_url}" target="_blank" onclick="event.stopPropagation()" class="linkedin-link">in</a>`:'<span></span>'}
+          ${amb.instagram_url?`<a href="${amb.instagram_url}" target="_blank" onclick="event.stopPropagation()" class="instagram-link">IG</a>`:'<span></span>'}
         </div>
       </div>`;
     }).join('');
@@ -542,7 +546,12 @@ function renderMyAmbassadors() {
         <td style="font-weight:600">${formatFollowers(amb.followers)}</td>
         <td style="font-weight:600;color:var(--teal)">${amb.years_experience!=null?amb.years_experience+' yrs':'—'}</td>
         <td><span class="status-badge status-${amb.status||'active'}">${amb.status||'active'}</span></td>
-        <td>${amb.linkedin_url?`<a href="${amb.linkedin_url}" target="_blank" onclick="event.stopPropagation()" class="linkedin-link">in</a>`:''}</td>
+        <td>
+          <div style="display:flex;gap:0.375rem">
+            ${amb.linkedin_url?`<a href="${amb.linkedin_url}" target="_blank" onclick="event.stopPropagation()" class="linkedin-link">in</a>`:''}
+            ${amb.instagram_url?`<a href="${amb.instagram_url}" target="_blank" onclick="event.stopPropagation()" class="instagram-link">IG</a>`:''}
+          </div>
+        </td>
       </tr>`;
     }).join('');
   }
@@ -606,6 +615,7 @@ async function openAmbassadorDetail(id) {
     amb.email ? `<div class="contact-row"><span class="contact-icon">✉</span><a href="mailto:${amb.email}" class="contact-link">${amb.email}</a></div>` : '',
     amb.phone ? `<div class="contact-row"><span class="contact-icon">📞</span><span>${amb.phone}</span></div>` : '',
     amb.linkedin_url ? `<div class="contact-row"><span class="contact-icon">in</span><a href="${amb.linkedin_url}" target="_blank" class="contact-link">LinkedIn Profile</a></div>` : '',
+    amb.instagram_url ? `<div class="contact-row"><span class="contact-icon">IG</span><a href="${amb.instagram_url}" target="_blank" class="contact-link">Instagram Profile</a></div>` : '',
   ].filter(Boolean).join('') || '<p style="color:var(--gray-400);font-size:0.83rem">No contact info</p>';
 
   const assignedProfile = allProfiles.find(p=>p.id===amb.assigned_to);
@@ -707,6 +717,7 @@ function openAmbassadorModal(data=null) {
     document.getElementById('ambFollowers').value   = data.followers||'';
     document.getElementById('ambYoe').value         = data.years_experience!=null?data.years_experience:'';
     document.getElementById('ambLinkedin').value    = data.linkedin_url||'';
+    document.getElementById('ambInstagram').value   = data.instagram_url||'';
     document.getElementById('ambEmail').value       = data.email||'';
     document.getElementById('ambPhone').value       = data.phone||'';
     document.getElementById('ambBio').value         = data.bio||'';
@@ -715,7 +726,7 @@ function openAmbassadorModal(data=null) {
   } else {
     document.getElementById('ambassadorModalTitle').textContent = 'Add Ambassador';
     document.getElementById('ambassadorId').value = '';
-    ['ambName','ambCity','ambState','ambFollowers','ambYoe','ambLinkedin','ambEmail','ambPhone','ambBio'].forEach(id=>{document.getElementById(id).value='';});
+    ['ambName','ambCity','ambState','ambFollowers','ambYoe','ambLinkedin','ambInstagram','ambEmail','ambPhone','ambBio'].forEach(id=>{document.getElementById(id).value='';});
     document.getElementById('ambAssignTo').value=''; document.getElementById('ambStatus').value='active';
   }
   openModal('ambassadorModal');
@@ -756,6 +767,7 @@ async function saveAmbassador() {
     followers:        parseInt(document.getElementById('ambFollowers').value)||0,
     years_experience: yoeRaw!=='' ? parseInt(yoeRaw) : null,
     linkedin_url:     document.getElementById('ambLinkedin').value.trim()||null,
+    instagram_url:    document.getElementById('ambInstagram').value.trim()||null,
     email:            document.getElementById('ambEmail').value.trim()||null,
     phone:            document.getElementById('ambPhone').value.trim()||null,
     bio:              document.getElementById('ambBio').value.trim()||null,

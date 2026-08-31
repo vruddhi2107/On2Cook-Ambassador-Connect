@@ -574,6 +574,21 @@ body {
 }
 .linkedin-link:hover { background: #cce4f5; }
 
+.instagram-link {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: #c13584;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 3px 8px;
+  background: #fce4f1;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.instagram-link:hover { background: #f8c9e3; }
+
 /* ============================================
    FILTER CHIPS
    ============================================ */
